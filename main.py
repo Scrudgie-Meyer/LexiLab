@@ -176,7 +176,12 @@ async def sync_research_datasets():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    asyncio.create_task(sync_research_datasets())
+    # запускаємо завантаження датасетів у фоні з затримкою
+    # щоб healthcheck встиг пройти до початку важких обчислень
+    async def delayed_sync():
+        await asyncio.sleep(5)
+        await sync_research_datasets()
+    asyncio.create_task(delayed_sync())
     yield
 
 
