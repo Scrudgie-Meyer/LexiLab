@@ -1,0 +1,21 @@
+[package]
+name = "rust_module"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "rust_module"
+crate-type = ["cdylib"]
+
+[dependencies]
+# PyO3 — Python binding
+pyo3 = { version = "0.20", features = ["extension-module"] }
+
+# порівняльні бібліотеки
+whatlang = "0.16"          # детекція мови
+unicode-segmentation = "1.11"  # токенізація по Unicode
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

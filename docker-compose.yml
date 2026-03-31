@@ -1,0 +1,35 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     lexilab
+      POSTGRES_PASSWORD: lexilab
+      POSTGRES_DB:       lexilab
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lexilab -d lexilab"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lexilab:lexilab@db:5432/lexilab
+      PYTHONPATH: /app
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
